@@ -96,5 +96,5 @@ describe('GET /todos/:id', () => {
             .get(`/todos/1234`)
             .expect(404)
             .end(done);
-    })
+    });
 });
