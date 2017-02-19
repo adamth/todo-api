@@ -41,7 +41,7 @@ app.get('/todos/:id', (req, res) => {
         if(!todo){
             return res.sendStatus(404);
         }
-        res.send({todo}).status(200);
+        res.send({todo});
     }).catch((e) => {
         res.send(e).sendStatus(400);
     });
@@ -58,10 +58,10 @@ app.delete('/todos/:id',(req, res) => {
         if(!todo){
             return res.sendStatus(404);
         }
-        res.send({todo}).sendStatus(200);
+        res.send({todo});
     }).catch((e) => {
         res.send(e).sendStatus(400);
-    })
+    });
 });
 
 app.listen(port, () => {
