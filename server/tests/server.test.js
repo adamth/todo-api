@@ -165,7 +165,7 @@ describe('PATCH /todos/:id',() => {
                 if(err){
                     return done(err);
                 }
-            }).catch((e) => done());
+            });
     })
 });
 
@@ -271,6 +271,24 @@ describe('POST /users/login', () => {
                 return done(err);
             }
             User.findById(users[1]._id).then((user) => {
+                expect(user.tokens.length).toEqual(0);
+                done();
+            }).catch((e) => done());
+        });
+    });
+});
+
+describe('DELETE /users/me/token', () => {
+    it('should remove auth token on log out',(done) => {
+        request(app)
+        .delete('/users/me/token')
+        .set('x-auth', users[0].tokens[0].token)
+        .expect(200)
+        .end((err) => {
+            if(err){
+                return done(err);
+            }
+            User.findById(users[0]._id).then((user) => {
                 expect(user.tokens.length).toEqual(0);
                 done();
             }).catch((e) => done());
