@@ -165,7 +165,7 @@ describe('PATCH /todos/:id',() => {
                 if(err){
                     return done(err);
                 }
-            });
+            }).catch((e) => done());
     })
 });
 
@@ -216,21 +216,64 @@ describe('POST /users',() => {
                 expect(user).toExist();
                 expect(user.password).toNotBe(password);
                 done();
-            })
+            }).catch((e) => done());
         });
-    })
+    });
     it('should reutrn validation errors if request invalid', (done) => {
         request(app)
         .post('/users')
         .send({email:'test', password:'12'})
         .expect(400)
         .end(done);
-    })
+    });
     it('should not create user if email is in use', (done) => {
         request(app)
         .post('/users')
         .send({email: users[0].email, password: users[0].password})
         .expect(400)
         .end(done);
-    })
-})
+    });
+});
+
+describe('POST /users/login', () => {
+    it('should login user and return auth token', (done) => {
+        request(app)
+        .post('/users/login')
+        .send({email: users[1].email, password: users[1].password})
+        .expect(200)
+        .expect((res) =>{
+            expect(res.headers['x-auth']).toExist();
+        })
+        .end((err) => {
+            if(err){
+                return done(err);
+            }
+            User.findById(users[1]._id).then((user) => {
+                expect(user.tokens[0]).toInclude({
+                    access: 'x-auth',
+                    token: res.headers['x-auth']
+                });
+                done();
+            }).catch((e) => done());
+        });
+    });
+
+    it('should reject invalid login', (done) => {
+        request(app)
+        .post('/users/login')
+        .send({email: users[1].email + '1', password: users[1].password})
+        .expect(400)
+        .expect((res) =>{
+            expect(res.headers['x-auth']).toNotExist();
+        })
+        .end((err) => {
+            if(err){
+                return done(err);
+            }
+            User.findById(users[1]._id).then((user) => {
+                expect(user.tokens.length).toEqual(0);
+                done();
+            }).catch((e) => done());
+        });
+    });
+});
